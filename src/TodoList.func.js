@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
 import NewTodo from './NewTodo';
 import TodoItem from './TodoItem';
 import uniqueId from 'lodash.uniqueid';
+import About from './About';
 
-const dontDoThis = () => {
-  const [nope, setNope] = useState('');
-};
+// const dontDoThis = () => {
+//   const [nope, setNope] = useState('');
+// };
 
 const Container = styled('div')`
   margin: 3em auto 0 auto;
@@ -28,13 +29,34 @@ const List = styled('ul')`
   padding-left: 0;
 `;
 
-const todos = ['one', 'two', 'three'];
+// const todos = ['one', 'two', 'three'];
 export default function TodoList() {
   const [newTodo, updateNewTodo] = useState('');
-  const [todos, updateTodos] = useState([]);
-  if (new Date().getDay() === 1) {
-    const [special, setSpecial] = useState(false);
-  }
+  const initialTodos = () => JSON.parse(window.localStorage.getItem('todos') || '[]');
+  const [todos, updateTodos] = useState(initialTodos);
+  useEffect(() => {
+    window.localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+  useEffect(() => {
+    const inCompleteTodos = todos.reduce(
+      (memo, todo) => (!todo.completed ? memo + 1 : memo),
+      0
+    );
+    document.title = inCompleteTodos ? `Todos (${inCompleteTodos})` : 'Todos';
+  });
+  let [showAbout, setShowAbout] = useState(false);
+  useEffect(() => {
+    const handleKey = ({ key }) => {
+      setShowAbout(show =>
+        key === '?' ? true : key === 'Escape' ? false : show
+      );
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, []);
+  // if (new Date().getDay() === 1) {
+  //   const [special, setSpecial] = useState(false);
+  // }
   const handleNewSubmit = e => {
     e.preventDefault();
     updateTodos(prevTodos => [
@@ -66,7 +88,7 @@ export default function TodoList() {
         value={newTodo}
         onChange={handleNewChange}
       />
-      <ul>
+      {/* <ul>
         {todos.map(item => {
           const [count, setCount] = useState(0);
           return (
@@ -75,7 +97,7 @@ export default function TodoList() {
             </li>
           );
         })}
-      </ul>
+      </ul> */}
       {!!todos.length && (
         <List>
           {todos.map(todo => (
@@ -88,6 +110,7 @@ export default function TodoList() {
           ))}
         </List>
       )}
+      <About isOpen={showAbout} onClose={() => setShowAbout(false)} />
     </Container>
   );
 }
