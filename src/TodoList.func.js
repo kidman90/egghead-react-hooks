@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import NewTodo from './NewTodo';
 import TodoItem from './TodoItem';
-import uniqueId from 'lodash.uniqueid';
+// import uniqueId from 'lodash.uniqueid';
 import About from './About';
 
 // const dontDoThis = () => {
@@ -32,6 +32,7 @@ const List = styled('ul')`
 // const todos = ['one', 'two', 'three'];
 export default function TodoList() {
   const [newTodo, updateNewTodo] = useState('');
+  const todoId = useRef(0);
   const initialTodos = () => JSON.parse(window.localStorage.getItem('todos') || '[]');
   const [todos, updateTodos] = useState(initialTodos);
   useEffect(() => {
@@ -59,10 +60,11 @@ export default function TodoList() {
   // }
   const handleNewSubmit = e => {
     e.preventDefault();
+    todoId.current += 1
     updateTodos(prevTodos => [
       ...prevTodos,
       {
-        id: uniqueId(),
+        id: todoId.current,
         text: newTodo,
         completed: false
       }
