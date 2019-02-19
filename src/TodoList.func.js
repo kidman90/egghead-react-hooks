@@ -4,6 +4,10 @@ import NewTodo from './NewTodo';
 import TodoItem from './TodoItem';
 import uniqueId from 'lodash.uniqueid';
 
+const dontDoThis = () => {
+  const [nope, setNope] = useState('');
+};
+
 const Container = styled('div')`
   margin: 3em auto 0 auto;
   width: 75%;
@@ -24,9 +28,13 @@ const List = styled('ul')`
   padding-left: 0;
 `;
 
+const todos = ['one', 'two', 'three'];
 export default function TodoList() {
   const [newTodo, updateNewTodo] = useState('');
   const [todos, updateTodos] = useState([]);
+  if (new Date().getDay() === 1) {
+    const [special, setSpecial] = useState(false);
+  }
   const handleNewSubmit = e => {
     e.preventDefault();
     updateTodos(prevTodos => [
@@ -58,6 +66,16 @@ export default function TodoList() {
         value={newTodo}
         onChange={handleNewChange}
       />
+      <ul>
+        {todos.map(item => {
+          const [count, setCount] = useState(0);
+          return (
+            <li onClick={() => setCount(count + 1)}>
+              {item}: {count}
+            </li>
+          );
+        })}
+      </ul>
       {!!todos.length && (
         <List>
           {todos.map(todo => (
