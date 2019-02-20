@@ -7,7 +7,7 @@ const Section = styled('section')`
   margin: 32px;
 `;
 
-export default function BatteryPlayground() {
+const useBattery = () => {
   const [battery, setBattery] = useState({ level: 0, charging: false });
   const handleChange = ({ target: { level, charging } }) =>
     setBattery({ level, charging });
@@ -25,7 +25,11 @@ export default function BatteryPlayground() {
       battery.removeEventListener("chargingchange", handleChange);
     };
   }, []);
+  return battery;
+};
 
+export default function BatteryPlayground() {
+  const battery = useBattery();
   return (
     <Section>
       <Battery {...battery} />
