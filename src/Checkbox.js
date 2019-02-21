@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { Component } from 'react';
 import styled from '@emotion/styled';
+import ThemeContext from './ThemeContext';
+import styles from './styles';
 
 const Wrapper = styled('div')`
   position: relative;
@@ -20,14 +22,17 @@ const Label = styled('label')`
   display: inline-block;
   padding-left: 1.5em;
   text-decoration: ${props => (props.completed ? 'line-through' : 'initial')};
-  color: ${props => (props.completed ? '#ccc' : 'white')};
+  color: ${props =>
+    props.completed
+      ? styles[props.theme].checkbox.labelColorComplete
+      : styles[props.theme].checkbox.labelColorIncomplete};
   &:before {
     content: "";
-    background-color: #fff;
+    background-color: ${props => styles[props.theme].checkbox.backgroundColor};
     background-repeat: no-repeat;
     background-position: center;
     background-size: 50% auto;
-    border: 2px solid #ccc;
+    border: 2px solid ${props => styles[props.theme].checkbox.borderColor};
     border-radius: 50%;
     position: absolute;
     left: 0;
@@ -38,10 +43,11 @@ const Label = styled('label')`
     cursor: pointer;
   }
   input[type='checkbox']:focus + &:before {
-    border-color: #70b77e;
+    border-color: ${props => styles[props.theme].checkbox.borderColorFocus};
   }
   input[type='checkbox']:checked + &:before {
-    background-color: #70b77e; // #f2545b;
+    background-color: ${props =>
+    styles[props.theme].checkbox.backgroundColorChecked};
     opacity: 1;
     background-image: url('data:image/svg+xml,\
       <svg viewBox="0 0 127 132" xmlns="http://www.w3.org/2000/svg">\
@@ -52,19 +58,30 @@ const Label = styled('label')`
   }
 `;
 
-export default function Checkbox({ id, label, checked, onChange }) {
-  return (
-    <Wrapper>
-      <Input
-        type="checkbox"
-        id={id}
-        name={id}
-        checked={checked}
-        onChange={onChange}
-      />
-      <Label htmlFor={id} aria-hidden="true" completed={checked}>
-        {label}
-      </Label>
-    </Wrapper>
-  );
+class Checkbox extends Component {
+  render() {
+    const { id, label, checked, onChange } = this.props;
+    return (
+      <Wrapper>
+        <Input
+          type="checkbox"
+          id={id}
+          name={id}
+          checked={checked}
+          onChange={onChange}
+        />
+        <Label
+          htmlFor={id}
+          aria-hidden="true"
+          completed={checked}
+          theme={this.context}
+        >
+          {label}
+        </Label>
+      </Wrapper>
+    );
+  }
 }
+Checkbox.contextType = ThemeContext;
+
+export default Checkbox;

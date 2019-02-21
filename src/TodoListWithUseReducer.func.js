@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef, useReducer, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useReducer, useMemo, useContext } from 'react';
 import styled from '@emotion/styled';
 import NewTodo from './NewTodo';
 import TodoItem from './TodoItem';
 // import uniqueId from 'lodash.uniqueid';
 import About from './About';
 import { useTitle as useDocumentTitle } from 'react-use';
+import ThemeContext from './ThemeContext';
+import styles from './styles';
 
 // const dontDoThis = () => {
 //   const [nope, setNope] = useState('');
@@ -24,7 +26,7 @@ const Container = styled('div')`
 
 const List = styled('ul')`
   list-style: none;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid ${props => styles[props.theme].list.borderColor};
   border-top: none;
   margin: 0;
   padding-left: 0;
@@ -136,6 +138,7 @@ export default function TodoList() {
   const handleCompletedToggle = id => {
     dispatch({ type: 'TOGGLE_TODO', id });
   };
+  const theme = useContext(ThemeContext);
 
   return (
     <Container todos={todos}>
@@ -155,7 +158,7 @@ export default function TodoList() {
         })}
       </ul> */}
       {!!todos.length && (
-        <List>
+        <List theme={theme}>
           {todos.map(todo => (
             <TodoItem
               key={todo.id}
