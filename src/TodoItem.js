@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useContext, memo } from 'react';
 import styled from '@emotion/styled';
 import Checkbox from './Checkbox';
 import ThemeContext from './ThemeContext';
@@ -28,25 +28,20 @@ const Item = styled('li')`
   }
 `;
 
-class TodoItem extends Component {
-  render() {
-    const { todo, onChange, onDelete } = this.props;
-    console.log('TodoItem', { context: this.context });
-    return (
-      <Item key={todo.id} theme={this.context}>
-        <Checkbox
-          id={todo.id}
-          label={todo.text}
-          checked={todo.completed}
-          onChange={onChange.bind(this, todo.id)}
-        />
-        <Button onClick={onDelete.bind(this, todo.id)} theme={this.context}>
-          x
-        </Button>
-      </Item>
-    );
-  }
-}
-TodoItem.contextType = ThemeContext;
-
-export default TodoItem;
+export default memo(function TodoItem({ todo, onChange, onDelete }) {
+  console.log('TodoItem', { todo, onChange, onDelete });
+  const theme = useContext(ThemeContext);
+  return (
+    <Item key={todo.id} theme={theme}>
+      <Checkbox
+        id={todo.id}
+        label={todo.text}
+        checked={todo.completed}
+        onChange={onChange.bind(this, todo.id)}
+      />
+      <Button onClick={onDelete.bind(this, todo.id)} theme={theme}>
+        x
+      </Button>
+    </Item>
+  );
+}, ({ todo: prevTodo }, { todo: nextTodo }) => prevTodo === nextTodo);
