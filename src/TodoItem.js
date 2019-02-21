@@ -1,7 +1,8 @@
-import React, { useContext, memo } from 'react';
+import React, { useContext, useMemo, memo } from 'react';
 import styled from '@emotion/styled';
 import Checkbox from './Checkbox';
 import ThemeContext from './ThemeContext';
+import Color from 'color';
 import styles from './styles';
 
 const Button = styled('button')`
@@ -17,7 +18,8 @@ const Button = styled('button')`
 const Item = styled('li')`
   font-size: 1.75em;
   padding: 0.25em 0.25em 0.25em 0.5em;
-  color: ${props => styles[props.theme].todo.item.color};
+  background: ${props => props.ageColors.background};
+  color: ${props => props.ageColors.color};
   border-bottom: 1px solid
     ${props => styles[props.theme].todo.item.borderBottom};
   display: flex;
@@ -28,11 +30,26 @@ const Item = styled('li')`
   }
 `;
 
+const getColors = (text, theme) => {
+  console.log('figuring...');
+  const themeColor = styles[theme].todo.backgroundColor;
+  const lengthPercentage = (text.length * 100) / 42;
+  const darkenedColor = Color(themeColor).darken(lengthPercentage / 100);
+  const background = `linear-gradient(90deg, ${themeColor} 0%, ${darkenedColor.hex()} 100%)`;
+  const color = darkenedColor.isLight() ? 'black' : 'white';
+  return { color, background };
+};
+
 export default memo(function TodoItem({ todo, onChange, onDelete }) {
-  console.log('TodoItem', { todo, onChange, onDelete });
+  // console.log('TodoItem', { todo, onChange, onDelete });
   const theme = useContext(ThemeContext);
+  console.log('calling...');
+  const ageColors = useMemo(() => getColors(todo.text, theme), [
+    todo.text,
+    theme
+  ]);
   return (
-    <Item key={todo.id} theme={theme}>
+    <Item key={todo.id} theme={theme} ageColors={ageColors}>
       <Checkbox
         id={todo.id}
         label={todo.text}
@@ -44,4 +61,4 @@ export default memo(function TodoItem({ todo, onChange, onDelete }) {
       </Button>
     </Item>
   );
-}, ({ todo: prevTodo }, { todo: nextTodo }) => prevTodo === nextTodo);
+});

@@ -26,6 +26,7 @@ export default {
       borderColor: 'rgba(255, 255, 255, 0.5)'
     },
     todo: {
+      backgroundColor: '#4286f4',
       button: {
         color: 'white'
       },
@@ -70,6 +71,7 @@ export default {
       borderColor: 'rgba(0, 0, 0, 0.5)'
     },
     todo: {
+      backgroundColor: '#EDE574',
       button: {
         color: 'black'
       },
