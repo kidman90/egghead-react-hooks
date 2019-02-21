@@ -5,6 +5,7 @@ import styles from './styles';
 
 const Wrapper = styled('div')`
   position: relative;
+  flex-grow: 1;
 `;
 
 const Input = styled('input')`

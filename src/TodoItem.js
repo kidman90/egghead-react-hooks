@@ -1,9 +1,11 @@
-import React, { useContext, useMemo, memo } from 'react';
+import React, { useContext, useMemo, memo, useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
+import keyframes from '@emotion/keyframes';
 import Checkbox from './Checkbox';
 import ThemeContext from './ThemeContext';
 import Color from 'color';
 import styles from './styles';
+import elementResizeEvent from 'element-resize-event';
 
 const Button = styled('button')`
   font-weight: 400;
@@ -13,6 +15,15 @@ const Button = styled('button')`
   background-color: transparent;
   margin: 5px;
   cursor: pointer;
+`;
+
+const moveAnimation = keyframes`
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
 `;
 
 const Item = styled('li')`
@@ -25,13 +36,41 @@ const Item = styled('li')`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  &:before {
+    content: ${props => (props.striped ? `""` : 'normal')};
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.2) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.2) 75%,
+      transparent 75%,
+      transparent
+    );
+    z-index: 1;
+    background-size: 53px 53px;
+    animation: move 2s linear infinite;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    overflow: hidden;
+    animation: ${moveAnimation} 2s linear infinite;
+  }
   &:last-of-type {
     border-bottom: none;
   }
 `;
 
 const getColors = (text, theme) => {
-  console.log('figuring...');
+  // console.log('figuring...');
   const themeColor = styles[theme].todo.backgroundColor;
   const lengthPercentage = (text.length * 100) / 42;
   const darkenedColor = Color(themeColor).darken(lengthPercentage / 100);
@@ -40,22 +79,51 @@ const getColors = (text, theme) => {
   return { color, background };
 };
 
+const useSize = defaultSize => {
+  const wrapperRef = useRef(null);
+  const [size, setSize] = useState(defaultSize);
+  useEffect(() => {
+    const updateSize = () => {
+      const element = wrapperRef.current;
+      setSize({ height: element.clientHeight, width: element.clientWidth });
+    };
+    const element = wrapperRef.current;
+    updateSize();
+    elementResizeEvent(element, updateSize);
+    return () => elementResizeEvent.unbind(wrapperRef.current);
+  }, []);
+  return [size, wrapperRef];
+};
+
 export default memo(function TodoItem({ todo, onChange, onDelete }) {
   // console.log('TodoItem', { todo, onChange, onDelete });
   const theme = useContext(ThemeContext);
-  console.log('calling...');
+  // console.log('calling...');
   const ageColors = useMemo(() => getColors(todo.text, theme), [
     todo.text,
     theme
   ]);
+  const [{ width, height }, wrapperRef] = useSize({
+    width: 0,
+    height: 0
+  });
   return (
-    <Item key={todo.id} theme={theme} ageColors={ageColors}>
+    <Item
+      key={todo.id}
+      innerRef={wrapperRef}
+      theme={theme}
+      striped={height > 53}
+      ageColors={ageColors}
+    >
       <Checkbox
         id={todo.id}
         label={todo.text}
         checked={todo.completed}
         onChange={onChange.bind(this, todo.id)}
       />
+      <code style={{ flex: "0 0 50px", margin: "0 5px" }}>
+        {width}×{height}
+      </code>
       <Button onClick={onDelete.bind(this, todo.id)} theme={theme}>
         x
       </Button>
