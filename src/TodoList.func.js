@@ -29,32 +29,62 @@ const List = styled('ul')`
   padding-left: 0;
 `;
 
-// const todos = ['one', 'two', 'three'];
-export default function TodoList() {
-  const [newTodo, updateNewTodo] = useState('');
-  const todoId = useRef(0);
-  const initialTodos = () => JSON.parse(window.localStorage.getItem('todos') || '[]');
-  const [todos, updateTodos] = useState(initialTodos);
+const useLocalStorage = (key, defaultValue, callback) => {
+  const initialValue = () => {
+    const valueFromStorage = JSON.parse(window.localStorage.getItem(key) || JSON.stringify(defaultValue));
+    if (callback) {
+      callback(valueFromStorage);
+    }
+    return valueFromStorage;
+  };
+  const [storage, setStorage] = useState(initialValue);
   useEffect(() => {
-    window.localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
+    window.localStorage.setItem(key, JSON.stringify(storage));
+  }, [storage]);
+  return [storage, setStorage];
+};
+
+const useDocumentTitle = title => {
   useEffect(() => {
-    const inCompleteTodos = todos.reduce(
-      (memo, todo) => (!todo.completed ? memo + 1 : memo),
-      0
-    );
-    document.title = inCompleteTodos ? `Todos (${inCompleteTodos})` : 'Todos';
-  });
-  let [showAbout, setShowAbout] = useState(false);
+    document.title = title;
+  }, [title]);
+};
+
+const useKeyDown = (map, defaultValue) => {
+  const [match, setMatch] = useState(defaultValue);
   useEffect(() => {
     const handleKey = ({ key }) => {
-      setShowAbout(show =>
-        key === '?' ? true : key === 'Escape' ? false : show
+      setMatch(prevMatch =>
+        Object.keys(map).some(k => k === key)
+          ? map[key]
+          : prevMatch
       );
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
+  return [match, setMatch];
+};
+// const todos = ['one', 'two', 'three'];
+export default function TodoList() {
+  const [newTodo, updateNewTodo] = useState('');
+  const todoId = useRef(0);
+  const [todos, updateTodos] = useLocalStorage('todos', [], values => {
+    todoId.current = values.reduce(
+      (memo, todo) => Math.max(memo, todo.id),
+      0
+    );
+  });
+  const inCompleteTodos = todos.reduce(
+    (memo, todo) => (!todo.completed ? memo + 1 : memo),
+    0
+  );
+  const title = inCompleteTodos ? `Todos (${inCompleteTodos})` : 'Todos';
+  useDocumentTitle(title);
+  let [showAbout, setShowAbout] = useKeyDown({
+    '?': true,
+    Escape: false
+  }, false);
   // if (new Date().getDay() === 1) {
   //   const [special, setSpecial] = useState(false);
   // }
