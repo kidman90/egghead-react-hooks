@@ -4,6 +4,7 @@ import NewTodo from './NewTodo';
 import TodoItem from './TodoItem';
 // import uniqueId from 'lodash.uniqueid';
 import About from './About';
+import { useTitle as useDocumentTitle } from 'react-use';
 
 // const dontDoThis = () => {
 //   const [nope, setNope] = useState('');
@@ -44,11 +45,11 @@ const useLocalStorage = (key, defaultValue, callback) => {
   return [storage, setStorage];
 };
 
-const useDocumentTitle = title => {
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
-};
+// const useDocumentTitle = title => {
+//   useEffect(() => {
+//     document.title = title;
+//   }, [title]);
+// };
 
 const useKeyDown = (map, defaultValue) => {
   const [match, setMatch] = useState(defaultValue);
